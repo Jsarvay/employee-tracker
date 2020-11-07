@@ -1,8 +1,8 @@
 //Set dependencies and connect to mysql
-var inquirer = require("inquirer");
-var mysql = require("mysql");
+const inquirer = require("inquirer");
+const mysql = require("mysql");
 
-var connection = mysql.createConnection({
+const connection = mysql.createConnection({
     host: "localhost",
   
     // Your port; if not 3306
@@ -64,5 +64,28 @@ function employeeTracker() {
                 connection.end();
                 break;
         };
+    });
+};
+
+//Add function that allows the user to add a Department
+function addDepartment(){
+    inquirer.prompt({
+        type: "input",
+        name: "department",
+        message: "What is the name of the new department you would like to add?"
+    }).then(function(response){
+        console.log("Adding Department...\n");
+        connection.query(
+            "INSERT INTO department SET ?",
+            {
+                department_name: response.department
+            },
+            function(err, res) {
+                if (err) throw (err);
+                console.log("Department updated");
+                //viewDepartments();
+                employeeTracker();
+            }
+        );
     });
 };
