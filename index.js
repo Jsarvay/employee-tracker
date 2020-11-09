@@ -205,10 +205,30 @@ function addEmployee() {
 function viewDepartments() {
     connection.query("SELECT * FROM department", function(err, res){
         if (err) throw (err);
-        for (var o = 0; o < res.length; o++){
-            console.log("Department ID: " + res[o].department_id + " | " + "Department: " + res[o].department_name + "\n");
+        let data = [];
+        for (var n = 0; n < res.length; n++){
+            data.push(res[n].department_name);
         };
-        employeeTracker();
+        inquirer.prompt(
+            {
+            type: "list",
+            name: "department",
+            message: "Which Department would you like to view?",
+            choices: data
+            }
+        ).then(function(response){
+            connection.query("SELECT * FROM department WHERE department_name=?", [response.department], function(err, res){
+                if (err) throw (err);
+                let id = res[0].department_id;
+                connection.query("SELECT * FROM department INNER JOIN roles ON roles.department_id = department.department_id INNER JOIN employee ON employee.role_id = roles.role_id WHERE department.department_id = ?", [id], function(err, res){
+                    if (err) throw (err);
+                    for (var r = 0; r < res.length; r++){
+                        console.log("Department: " + res[r].department_name + " | " + "Employee ID: " + res[r].employee_id + " | " + "Employee: " + res[r].first_name + " " + res[r].last_name + " | " + "Role: " + res[r].title + " | " + res[r].salary + " | " + "Manager ID: " + res[r].manager_id);
+                    }
+                    employeeTracker();
+                });
+            });
+        });
     });
 };
 
