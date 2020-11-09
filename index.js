@@ -1,6 +1,7 @@
 //Set dependencies and connect to mysql
 const inquirer = require("inquirer");
 const mysql = require("mysql");
+const consoletable = require("console.table")
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -222,9 +223,7 @@ function viewDepartments() {
                 let id = res[0].department_id;
                 connection.query("SELECT * FROM department INNER JOIN roles ON roles.department_id = department.department_id INNER JOIN employee ON employee.role_id = roles.role_id WHERE department.department_id = ?", [id], function(err, res){
                     if (err) throw (err);
-                    for (var r = 0; r < res.length; r++){
-                        console.log("Department: " + res[r].department_name + " | " + "Employee ID: " + res[r].employee_id + " | " + "Employee: " + res[r].first_name + " " + res[r].last_name + " | " + "Role: " + res[r].title + " | " + res[r].salary + " | " + "Manager ID: " + res[r].manager_id);
-                    }
+                    console.table(res);
                     employeeTracker();
                 });
             });
@@ -253,9 +252,7 @@ function viewRoles() {
                 let id = res[0].role_id;
                 connection.query("SELECT * FROM department INNER JOIN roles ON roles.department_id = department.department_id INNER JOIN employee ON employee.role_id = roles.role_id WHERE roles.role_id = ?", [id], function(err, res){
                     if (err) throw (err);
-                    for (var r = 0; r < res.length; r++){
-                        console.log("Department: " + res[r].department_name + " | " + "Employee ID: " + res[r].employee_id + " | " + "Employee: " + res[r].first_name + " " + res[r].last_name + " | " + "Role: " + res[r].title + " | " + res[r].salary + " | " + "Manager ID: " + res[r].manager_id);
-                    }
+                    console.table(res);
                     employeeTracker();
                 });
             });
@@ -267,9 +264,7 @@ function viewRoles() {
 function viewEmployees() {
     connection.query("SELECT * FROM department INNER JOIN roles ON roles.department_id = department.department_id INNER JOIN employee ON employee.role_id = roles.role_id ORDER BY department.department_id", function(err, res){
         if (err) throw (err);
-        for (var r = 0; r < res.length; r++){
-            console.log("Department: " + res[r].department_name + " | " + "Employee ID: " + res[r].employee_id + " | " + "Employee: " + res[r].first_name + " " + res[r].last_name + " | " + "Role: " + res[r].title + " | " + res[r].salary + " | " + "Manager ID: " + res[r].manager_id);
-        }
+        console.table(res);
         employeeTracker();
     });
 };
