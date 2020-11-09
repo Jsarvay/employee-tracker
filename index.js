@@ -17,11 +17,12 @@ const connection = mysql.createConnection({
   });
   
   connection.connect(function(err) {
-    if (err) throw err;
+    if (err) throw (err);
     console.log("Sarvay's Employee Tracker");
     employeeTracker();
   });
 
+//Start the initial command line prompt
 function employeeTracker() {
     inquirer.prompt({
         type: "list",
@@ -230,5 +231,55 @@ function viewEmployees() {
             console.log("Employee ID: " + res[t].employee_id + " | " + "Name: " + res[t].first_name + " " + res[t].last_name + " | " + "Role ID: " + res[t].role_id + " | " + "Manager ID: " + res[t].manager_id);
         };
         employeeTracker();
+    });
+};
+
+//Function that allows the user to update an employee's role
+function updateEmployee() {
+    connection.query("SELECT * FROM employee", function(err, res){
+        if (err) throw (err);
+        let data = [];
+        for(var e = 0; e < res.length; e++){
+            data.push(res[e].first_name);
+        };
+        connection.query("SELECT * FROM roles", function(err, res){
+            let dataTwo = [];
+            for(var a = 0; a < res.length; a++){
+                dataTwo.push(res[a].title);
+            };
+            inquirer.prompt([
+                {
+                    type: "list",
+                    name: "employee",
+                    message: "Which employee's role would you like to update?",
+                    choices: data
+                },
+                {
+                    type: "list",
+                    name: "role",
+                    message: "What is that employee's new role?",
+                    choices: dataTwo
+                }
+            ]).then(function(response){
+                let id = "";
+                connection.query("SELECT * FROM roles WHERE title=?", [response.role], function(err, res){
+                    id = res[0].role_id;
+                connection.query("UPDATE employee SET ? WHERE ?",
+                [
+                    {
+                        role_id: id
+                    },
+                    {
+                        first_name: response.employee
+                    }
+                ],
+                function(err, res){
+                    if (err) throw (err);
+                    console.log(response.employee + "'s Role Updated to " + response.role);
+                    employeeTracker();
+                });
+            });
+            });
+        });
     });
 };
