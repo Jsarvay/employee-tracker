@@ -67,7 +67,7 @@ function employeeTracker() {
     });
 };
 
-//Add function that allows the user to add a Department
+//Function that allows the user to add a Department
 function addDepartment(){
     inquirer.prompt({
         type: "input",
@@ -87,5 +87,115 @@ function addDepartment(){
                 employeeTracker();
             }
         );
+    });
+};
+
+//Function that allows the user to add a role
+function addRole() {
+    connection.query("SELECT * FROM department", function(err, res){
+        if (err) throw (err);
+        let data = [];
+        for(var i = 0; i < res.length; i++){
+            data.push(res[i].department_name);
+        }
+        inquirer.prompt([
+            {
+                type: "list",
+                name: "department",
+                message: "Which department is getting the new role?",
+                choices: data
+            },
+            {
+                type: "input",
+                name: "role",
+                message: "What is the new role you would like to add?"
+            },
+            {
+                type: "input",
+                name: "salary",
+                message: "What is this role's salary?"
+            }
+        ]).then(function(response){
+            connection.query("SELECT * FROM department where department_name=?", [response.department], function(err, res){
+                let id = res[0].department_id;
+                connection.query("INSERT INTO roles SET ?",
+                {
+                    title: response.role,
+                    salary: response.salary,
+                    department_id: id
+                },
+                function(err, res){
+                    if (err) throw (err);
+                    console.log("Role Added!");
+                    employeeTracker();
+                });
+            });
+        });
+    });
+};
+
+//Function that allows the user to add an employee
+function addEmployee() {
+    connection.query("SELECT * FROM roles", function(err, res){
+        if (err) throw (err);
+        let data = [];
+        for (var i = 0; i < res.length; i++){
+            data.push(res[i].title);
+        };
+        let dataTwo = ["none"];
+        connection.query("SELECT * FROM employee", function(err, res){
+            if (err) throw (err);
+            for (var j = 0; j < res.length; j++){
+                dataTwo.push(res[j].first_name);
+            };
+            inquirer.prompt([
+            {
+                type: "input",
+                name: "first",
+                message: "What is the employee's first name?"
+            },
+            {
+                type: "input",
+                name: "last",
+                message: "What is the employee's last name?"
+            },
+            {
+                type: "list",
+                name: "role",
+                message: "What is the employee's job title?",
+                choices: data
+            },
+            {
+                type: "list",
+                name: "manager",
+                message: "Who is the Employee's Manager?",
+                choices: dataTwo
+            }
+        ]).then(function(response){
+            let mgr = null;
+            if (response.manager != "none"){
+                connection.query("SELECT * FROM employee WHERE first_name=?", [response.manager], function(err, res){
+                    if (err) throw (err);
+                    mgr = res[0].employee_id;
+                });
+            };
+            connection.query("SELECT * FROM roles WHERE title=?", [response.role], function(err, res){
+                if (err) throw (err);
+                let id = res[0].role_id;
+                connection.query("INSERT INTO employee SET ?",
+                {
+                    first_name: response.first,
+                    last_name: response.last,
+                    role_id: id,
+                    manager_id: mgr
+                },
+                function(err, res){
+                    if (err) throw (err);
+                    console.log("Employee Added!");
+                    employeeTracker();
+                });
+            });
+        });
+    });
     });
 };
