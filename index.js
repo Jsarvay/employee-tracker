@@ -236,20 +236,40 @@ function viewDepartments() {
 function viewRoles() {
     connection.query("SELECT * FROM roles", function(err, res){
         if (err) throw (err);
-        for (var u = 0; u < res.length; u++){
-            console.log("Role ID: " + res[u].role_id + " | " + "Title: " + res[u].title + " | " + "Salary: $" + res[u].salary + " | " + "Department ID: " + res[u].department_id);
+        let data = [];
+        for (var h = 0; h < res.length; h++){
+            data.push(res[h].title);
         };
-        employeeTracker();
+        inquirer.prompt(
+            {
+            type: "list",
+            name: "role",
+            message: "Which Role would you like to view?",
+            choices: data
+            }
+        ).then(function(response){
+            connection.query("SELECT * FROM roles WHERE title=?", [response.role], function(err, res){
+                if (err) throw (err);
+                let id = res[0].role_id;
+                connection.query("SELECT * FROM department INNER JOIN roles ON roles.department_id = department.department_id INNER JOIN employee ON employee.role_id = roles.role_id WHERE roles.role_id = ?", [id], function(err, res){
+                    if (err) throw (err);
+                    for (var r = 0; r < res.length; r++){
+                        console.log("Department: " + res[r].department_name + " | " + "Employee ID: " + res[r].employee_id + " | " + "Employee: " + res[r].first_name + " " + res[r].last_name + " | " + "Role: " + res[r].title + " | " + res[r].salary + " | " + "Manager ID: " + res[r].manager_id);
+                    }
+                    employeeTracker();
+                });
+            });
+        });
     });
 };
 
 //Function that allows user to view employees
 function viewEmployees() {
-    connection.query("SELECT * FROM employee", function(err, res){
+    connection.query("SELECT * FROM department INNER JOIN roles ON roles.department_id = department.department_id INNER JOIN employee ON employee.role_id = roles.role_id ORDER BY department.department_id", function(err, res){
         if (err) throw (err);
-        for (var t = 0; t < res.length; t++){
-            console.log("Employee ID: " + res[t].employee_id + " | " + "Name: " + res[t].first_name + " " + res[t].last_name + " | " + "Role ID: " + res[t].role_id + " | " + "Manager ID: " + res[t].manager_id);
-        };
+        for (var r = 0; r < res.length; r++){
+            console.log("Department: " + res[r].department_name + " | " + "Employee ID: " + res[r].employee_id + " | " + "Employee: " + res[r].first_name + " " + res[r].last_name + " | " + "Role: " + res[r].title + " | " + res[r].salary + " | " + "Manager ID: " + res[r].manager_id);
+        }
         employeeTracker();
     });
 };
