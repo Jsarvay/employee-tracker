@@ -199,3 +199,36 @@ function addEmployee() {
     });
     });
 };
+
+//Function that allows the user to view departments
+function viewDepartments() {
+    connection.query("SELECT * FROM department", function(err, res){
+        if (err) throw (err);
+        for (var o = 0; o < res.length; o++){
+            console.log("Department ID: " + res[o].department_id + " | " + "Department: " + res[o].department_name + "\n");
+        };
+        employeeTracker();
+    });
+};
+
+//Function that allows the user to view roles
+function viewRoles() {
+    connection.query("SELECT * FROM roles", function(err, res){
+        if (err) throw (err);
+        for (var u = 0; u < res.length; u++){
+            console.log("Role ID: " + res[u].role_id + " | " + "Title: " + res[u].title + " | " + "Salary: $" + res[u].salary + " | " + "Department ID: " + res[u].department_id);
+        };
+        employeeTracker();
+    });
+};
+
+//Function that allows user to view employees
+function viewEmployees() {
+    connection.query("SELECT * FROM employee", function(err, res){
+        if (err) throw (err);
+        for (var t = 0; t < res.length; t++){
+            console.log("Employee ID: " + res[t].employee_id + " | " + "Name: " + res[t].first_name + " " + res[t].last_name + " | " + "Role ID: " + res[t].role_id + " | " + "Manager ID: " + res[t].manager_id);
+        };
+        employeeTracker();
+    });
+};
